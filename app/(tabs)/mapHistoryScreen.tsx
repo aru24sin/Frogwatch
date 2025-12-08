@@ -96,7 +96,18 @@ function resolveAudioURL(d: any): string | undefined {
   return undefined;
 }
 
+// Cache for geocoding results to avoid repeated API calls
+const geocodeCache: Record<string, string> = {};
+
 async function getCityFromCoords(lat: number, lon: number): Promise<string> {
+  // Create cache key from rounded coordinates
+  const cacheKey = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+  
+  // Return cached result if available
+  if (geocodeCache[cacheKey]) {
+    return geocodeCache[cacheKey];
+  }
+  
   try {
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
@@ -104,7 +115,11 @@ async function getCityFromCoords(lat: number, lon: number): Promise<string> {
     const data = await response.json();
     const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown';
     const state = data.address?.state || '';
-    return state ? `${city}, ${state}` : city;
+    const result = state ? `${city}, ${state}` : city;
+    
+    // Cache the result
+    geocodeCache[cacheKey] = result;
+    return result;
   } catch (error) {
     return 'Unknown Location';
   }
@@ -202,7 +217,7 @@ export default function MapHistoryScreen() {
 
       offSnap = onSnapshot(
         q,
-        async (snap) => {
+        (snap) => {
           // Double-check user is still logged in
           if (!auth.currentUser) {
             setRecordings([]);
@@ -221,7 +236,8 @@ export default function MapHistoryScreen() {
 
             const lat = Number(d?.location?.lat) || 0;
             const lon = Number(d?.location?.lng) || 0;
-            const locationCity = lat && lon ? await getCityFromCoords(lat, lon) : 'Unknown Location';
+            // Use stored locationCity if available, otherwise show coordinates temporarily
+            const locationCity = d.locationCity || (lat && lon ? `${lat.toFixed(2)}, ${lon.toFixed(2)}` : 'Unknown Location');
 
             const submitterName = d.submitter?.displayName || 
                                   `${d.submitter?.firstName || ''} ${d.submitter?.lastName || ''}`.trim() ||
@@ -259,6 +275,28 @@ export default function MapHistoryScreen() {
 
           setRecordings(rows);
           setLoading(false);
+          
+          // Background geocoding: update locations that show coordinates
+          const needsGeocode = rows.filter(r => 
+            r.locationCity?.includes(',') && 
+            !r.locationCity?.includes(' ') &&
+            r.location.latitude && 
+            r.location.longitude
+          );
+          
+          if (needsGeocode.length > 0) {
+            Promise.all(
+              needsGeocode.map(async (r) => {
+                const city = await getCityFromCoords(r.location.latitude, r.location.longitude);
+                return { recordingId: r.recordingId, city };
+              })
+            ).then((results) => {
+              setRecordings(prev => prev.map(rec => {
+                const update = results.find(u => u.recordingId === rec.recordingId);
+                return update ? { ...rec, locationCity: update.city } : rec;
+              }));
+            });
+          }
         },
         (err) => {
           // Only log error if user is still logged in (ignore permission errors on logout)

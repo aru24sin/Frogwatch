@@ -164,19 +164,18 @@ export default function UsersScreen() {
   const loadUsers = async () => {
     try {
       const usersSnapshot = await getDocs(collection(db, 'users'));
-      const usersData: User[] = [];
-
-      for (const userDoc of usersSnapshot.docs) {
+      
+      // Filter out admin users first
+      const nonAdminDocs = usersSnapshot.docs.filter(userDoc => {
         const userData = userDoc.data() as DocumentData;
-        
-        // Check if user is admin - skip admin users
         const roleStr = (userData.role || '').toString().toLowerCase();
         const userIsAdmin = userData.isAdmin === true || roleStr === 'admin';
-        
-        // Don't show admin users in the list
-        if (userIsAdmin) {
-          continue;
-        }
+        return !userIsAdmin;
+      });
+      
+      // Fetch all recording counts in parallel
+      const userPromises = nonAdminDocs.map(async (userDoc) => {
+        const userData = userDoc.data() as DocumentData;
         
         // Get user's recordings count
         const recordingsQuery = query(
@@ -186,9 +185,10 @@ export default function UsersScreen() {
         const recordingsSnapshot = await getDocs(recordingsQuery);
 
         // Check both role field (string) and boolean fields for compatibility
+        const roleStr = (userData.role || '').toString().toLowerCase();
         const userIsExpert = userData.isExpert === true || roleStr === 'expert';
 
-        usersData.push({
+        return {
           userId: userDoc.id,
           firstName: userData.firstName || '',
           lastName: userData.lastName || '',
@@ -199,8 +199,10 @@ export default function UsersScreen() {
           isPendingExpert: userData.isPendingExpert || false,
           submissionCount: recordingsSnapshot.size,
           avatarColor: avatarColors[Math.floor(Math.random() * avatarColors.length)],
-        });
-      }
+        } as User;
+      });
+      
+      const usersData = await Promise.all(userPromises);
 
       // Sort by submission count (highest first)
       usersData.sort((a, b) => b.submissionCount - a.submissionCount);

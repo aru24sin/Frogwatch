@@ -39,6 +39,16 @@ export default function AdminHomeScreen() {
       try {
         const snap = await getDoc(doc(db, "users", user.uid));
         const data = snap.data() || {};
+        
+        // Check if user is admin before loading admin-only data
+        const roleStr = (data.role || '').toString().toLowerCase();
+        const isAdmin = data.isAdmin === true || roleStr === 'admin';
+        
+        if (!isAdmin) {
+          // Not an admin, don't try to load stats (would fail due to permissions)
+          return;
+        }
+        
         const fn = (data.firstName || data.firstname || "").toString().trim();
         const ln = (data.lastName || data.lastname || "").toString().trim();
 
@@ -55,7 +65,7 @@ export default function AdminHomeScreen() {
           setLastName(null);
         }
 
-        // Load stats
+        // Load stats (only runs if user is admin)
         const rec = collection(db, 'recordings');
         const usersCol = collection(db, 'users');
         

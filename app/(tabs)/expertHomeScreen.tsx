@@ -88,6 +88,18 @@ export default function ExpertHomeScreen() {
         return;
       }
 
+      // Check if user is expert or admin before loading all recordings
+      const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+      const userData = userSnap.data() || {};
+      const roleStr = (userData.role || '').toString().toLowerCase();
+      const isExpert = userData.isExpert === true || roleStr === 'expert';
+      const isAdmin = userData.isAdmin === true || roleStr === 'admin';
+      
+      if (!isExpert && !isAdmin) {
+        // Not authorized to view all recordings
+        return;
+      }
+
       const rec = collection(db, "recordings");
 
       const needsReviewSnap = await getCountFromServer(
