@@ -21,9 +21,9 @@ import {
 import NavigationMenu from '../../components/NavigationMenu';
 
 // Firebase
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import API_CONFIG from '../../services/config';
+import logger from '../../services/logger';
 import app, { auth, db } from '../firebaseConfig';
 
 type TopItem = { species: string; confidence: number };
@@ -73,14 +73,7 @@ async function getUserProfile(uid: string) {
 
 async function ensureSignedIn() {
   if (auth.currentUser) return;
-  if (!__DEV__) throw new Error('Not signed in. Please log in.');
-
-  const email = process.env.EXPO_PUBLIC_DEV_EMAIL;
-  const password = process.env.EXPO_PUBLIC_DEV_PASSWORD;
-  if (!email || !password) {
-    throw new Error('No dev credentials. Set EXPO_PUBLIC_DEV_EMAIL / EXPO_PUBLIC_DEV_PASSWORD.');
-  }
-  await signInWithEmailAndPassword(auth, email, password);
+  throw new Error('Not signed in. Please log in first.');
 }
 
 // Reverse geocoding helper
@@ -100,7 +93,7 @@ async function getCityFromCoords(lat: number, lon: number): Promise<string> {
     if (state) return state;
     return 'Unknown Location';
   } catch (error) {
-    console.error('Geocoding error:', error);
+    logger.warn('Geocoding error', error);
     return 'Unknown Location';
   }
 }
@@ -160,7 +153,7 @@ export default function PredictionScreen() {
   }, []);
 
   useEffect(() => {
-    console.log('[predict] API_BASE =', API_BASE);
+    logger.debug('API_BASE configured', { url: API_BASE });
     return () => {
       mountedRef.current = false;
       if (sound) sound.unloadAsync().catch(() => {});
@@ -254,7 +247,7 @@ export default function PredictionScreen() {
         setSound(newSound);
       }
     } catch (error) {
-      console.error('Error playing sound:', error);
+      logger.error('Error playing sound', error);
     }
   };
 
@@ -329,7 +322,7 @@ export default function PredictionScreen() {
       });
 
       if (result.status < 200 || result.status >= 300) {
-        console.log('Storage upload failed:', result.status, result.body?.slice?.(0, 400));
+        logger.error('Storage upload failed', null, { status: result.status, body: result.body?.slice?.(0, 400) });
         throw new Error(`Storage upload failed (${result.status})`);
       }
 
@@ -420,10 +413,9 @@ export default function PredictionScreen() {
         Alert.alert('Submitted', 'Your recording was saved');
       }
     } catch (err: any) {
-      console.log('Submit failed details:', {
+      logger.error('Recording submission failed', err, {
         name: err?.name,
         code: err?.code,
-        message: err?.message,
       });
       Alert.alert('Submit failed', err?.message ?? String(err));
     } finally {
@@ -716,7 +708,7 @@ async function callPredict(uri: string, lat?: number, lon?: number) {
   for (const url of endpoints) {
     try {
       if (!isHttpUrl(url)) continue;
-      console.log('[predict] POST', url);
+      logger.debug('Prediction request', { url });
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 15_000);
       const resp = await fetch(url, { method: 'POST', body: form, signal: controller.signal });
@@ -733,12 +725,12 @@ async function callPredict(uri: string, lat?: number, lon?: number) {
         top3: Array.isArray(data.top3) ? data.top3 : [],
       };
     } catch (e) {
-      console.warn('[predict] failed on', url, e);
+      logger.warn('Prediction endpoint failed', { url, error: e });
       lastErr = e;
     }
   }
 
-  console.warn('[predict] All endpoints failed, using mock prediction for testing');
+  logger.warn('All prediction endpoints failed, using mock prediction');
   Alert.alert(
     'Server Unavailable',
     'Could not connect to prediction server. Using mock prediction for testing.\n\nTo fix: Make sure your backend server is running and your phone is on the same network.',

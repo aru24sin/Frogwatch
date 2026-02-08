@@ -435,10 +435,14 @@ export default function RecordScreen() {
 
           {/* Record Button */}
           {!audioUri && (
-            <TouchableOpacity 
-              style={styles.recordButton} 
+            <TouchableOpacity
+              style={styles.recordButton}
               onPress={toggleRecord}
               activeOpacity={0.8}
+              accessibilityLabel={isRecording ? 'Stop recording' : 'Start recording'}
+              accessibilityHint={isRecording ? 'Press to stop recording audio' : 'Press to start recording frog calls'}
+              accessibilityRole="button"
+              testID="record-button"
             >
               <View style={styles.recordButtonOuter}>
                 <View style={[styles.recordButtonInner, isRecording && styles.recordingActive]} />
@@ -448,14 +452,35 @@ export default function RecordScreen() {
 
           {/* Actions after recording */}
           {audioUri && !isRecording && (
-            <View style={styles.actions}>
-              <TouchableOpacity style={styles.actionButton} onPress={playAudio}>
+            <View style={styles.actions} accessibilityRole="menu">
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={playAudio}
+                accessibilityLabel="Play recording"
+                accessibilityHint="Press to listen to your recorded audio"
+                accessibilityRole="button"
+                testID="play-recording-button"
+              >
                 <Text style={styles.actionText}>Play/Replay Recording</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} onPress={reRecord}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={reRecord}
+                accessibilityLabel="Re-record"
+                accessibilityHint="Press to discard this recording and record again"
+                accessibilityRole="button"
+                testID="re-record-button"
+              >
                 <Text style={styles.actionText}>Re-record</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} onPress={upload}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={upload}
+                accessibilityLabel="Analyze recording"
+                accessibilityHint="Press to submit your recording for species identification"
+                accessibilityRole="button"
+                testID="analyze-recording-button"
+              >
                 <Text style={styles.actionText}>Analyze Recording</Text>
               </TouchableOpacity>
             </View>

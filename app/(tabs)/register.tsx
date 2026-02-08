@@ -24,7 +24,9 @@ export default function RegisterScreen() {
   const [securityQ1, setSecurityQ1] = useState('');
   const [securityQ2, setSecurityQ2] = useState('');
   const [securityQ3, setSecurityQ3] = useState('');
-  const [role, setRole] = useState<'Volunteer' | 'Expert' | 'Admin'>('Volunteer');
+  // SECURITY: All new users are created as Volunteers
+  // Role upgrades to Expert/Admin must be done by an admin through the admin panel
+  const role = 'Volunteer' as const;
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -120,7 +122,7 @@ export default function RegisterScreen() {
           placeholderTextColor="#fff"
         />
 
-        <Text style={styles.title2}>Security Questions:</Text>
+        <Text style={styles.sectionTitle}>Security Questions:</Text>
 
         <TextInput
           placeholder="What city were you born in?"
@@ -145,29 +147,6 @@ export default function RegisterScreen() {
           style={styles.input}
           placeholderTextColor="#fff"
         />
-
-        <Text style={styles.title2}>Not a Volunteer Account?</Text>
-
-        {/* Role Selection Buttons (default Volunteer, Expert/Admin optional) */}
-        <View style={styles.roleRow}>
-          <TouchableOpacity
-            style={[styles.roleButton, role === 'Expert' && styles.roleButtonActive]}
-            onPress={() => setRole(role === 'Expert' ? 'Volunteer' : 'Expert')}
-          >
-            <Text style={[styles.roleButtonText, role === 'Expert' && styles.roleButtonTextActive]}>
-              Expert
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.roleButton, role === 'Admin' && styles.roleButtonActive]}
-            onPress={() => setRole(role === 'Admin' ? 'Volunteer' : 'Admin')}
-          >
-            <Text style={[styles.roleButtonText, role === 'Admin' && styles.roleButtonTextActive]}>
-              Admin
-            </Text>
-          </TouchableOpacity>
-        </View>
 
         {error !== '' && <Text style={styles.error}>{error}</Text>}
 
@@ -208,7 +187,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
     paddingTop: 0,
   },
-  title2: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: '400',
     color: '#000',
@@ -231,30 +210,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
     color: '#fff',
-  },
-  roleRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 20,
-  },
-  roleButton: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 25,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
-    alignItems: 'center',
-  },
-  roleButtonActive: {
-    backgroundColor: '#B4FF44',
-  },
-  roleButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  roleButtonTextActive: {
-    color: '#000',
-    fontWeight: '500',
   },
   button: {
     backgroundColor: '#000',

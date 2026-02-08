@@ -128,6 +128,9 @@ export default function LoginScreen() {
         style={styles.input}
         keyboardType="email-address"
         autoCapitalize="none"
+        accessibilityLabel="Email address input"
+        accessibilityHint="Enter your email address to log in"
+        testID="login-email-input"
       />
       <TextInput
         placeholder="Password"
@@ -136,19 +139,41 @@ export default function LoginScreen() {
         onChangeText={setPassword}
         style={styles.input}
         secureTextEntry
+        accessibilityLabel="Password input"
+        accessibilityHint="Enter your password to log in"
+        testID="login-password-input"
       />
 
       {error !== '' && <Text style={styles.error}>{error}</Text>}
 
-      <TouchableOpacity onPress={handleLogin} style={[styles.button, busy && { opacity: 0.7 }]} disabled={busy}>
+      <TouchableOpacity
+        onPress={handleLogin}
+        style={[styles.button, busy && { opacity: 0.7 }]}
+        disabled={busy}
+        accessibilityLabel="Log in"
+        accessibilityHint="Press to log in to your account"
+        accessibilityRole="button"
+        testID="login-button"
+      >
         {busy ? <ActivityIndicator /> : <Text style={styles.buttonText}>Enter</Text>}
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => setForgotOpen(true)}>
+      <TouchableOpacity
+        onPress={() => setForgotOpen(true)}
+        accessibilityLabel="Forgot password"
+        accessibilityHint="Press to reset your password"
+        accessibilityRole="button"
+        testID="forgot-password-button"
+      >
         <Text style={styles.link}>Forgot password?</Text>
       </TouchableOpacity>
 
-      <Link href="./register" style={styles.link}>
+      <Link
+        href="./register"
+        style={styles.link}
+        accessibilityLabel="Register new account"
+        accessibilityHint="Press to create a new account"
+      >
         New user? Register here
       </Link>
 

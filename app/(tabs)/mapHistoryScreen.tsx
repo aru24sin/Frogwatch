@@ -1,7 +1,6 @@
 // app/(tabs)/mapHistoryScreen.tsx
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
@@ -18,7 +17,6 @@ import {
   Alert,
   Image,
   Modal,
-  NativeModules,
   ScrollView,
   StyleSheet,
   Text,
@@ -28,6 +26,7 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import NavigationMenu from '../../components/NavigationMenu';
+import API_CONFIG from '../../services/config';
 import app, { auth, db } from '../firebaseConfig';
 
 type Recording = {
@@ -64,23 +63,8 @@ const speciesImageMap: Record<string, any> = {
 };
 const placeholderImage = require('../../assets/frogs/placeholder.png');
 
-function pickDevHost() {
-  const hostUri =
-    (Constants as any)?.expoGoConfig?.hostUri ??
-    (Constants as any)?.expoGoConfig?.debuggerHost ??
-    (Constants as any)?.expoConfig?.hostUri ??
-    '';
-
-  if (hostUri) {
-    const h = String(hostUri).split(':')[0];
-    if (h) return h;
-  }
-
-  const scriptURL: string | undefined = (NativeModules as any)?.SourceCode?.scriptURL;
-  const m = scriptURL?.match(/\/\/([^/:]+):\d+/);
-  return m?.[1] ?? 'localhost';
-}
-const API_BASE = __DEV__ ? `http://${pickDevHost()}:8000` : 'https://your-production-domain';
+// Use centralized API configuration
+const API_BASE = API_CONFIG.BASE_URL;
 
 function resolveAudioURL(d: any): string | undefined {
   const filePath = d?.filePath || (d?.fileName ? `uploaded_audios/${d.fileName}` : undefined);

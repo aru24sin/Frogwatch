@@ -22,7 +22,6 @@ import {
   Alert,
   FlatList,
   Image,
-  NativeModules,
   StyleSheet,
   Text,
   TextInput,
@@ -30,6 +29,8 @@ import {
   View,
 } from 'react-native';
 import NavigationMenu from '../../components/NavigationMenu';
+import API_CONFIG from '../../services/config';
+import logger from '../../services/logger';
 import app, { auth, db } from '../firebaseConfig';
 
 type Recording = {
@@ -100,14 +101,8 @@ const getHomeScreen = async (): Promise<string> => {
   }
 };
 
-function pickDevHost() {
-  const url: string | undefined = (NativeModules as any)?.SourceCode?.scriptURL;
-  const m = url?.match(/\/\/([^/:]+):\d+/);
-  return m?.[1] ?? 'localhost';
-}
-const API_BASE = __DEV__
-  ? `http://${pickDevHost()}:8000`
-  : 'https://your-production-domain';
+// Use centralized API configuration
+const API_BASE = API_CONFIG.BASE_URL;
 
 function resolveAudioURL(d: any): string | undefined {
   const filePath =
@@ -340,7 +335,7 @@ export default function HistoryScreen() {
         (err) => {
           // Only log error if user is still logged in (ignore permission errors on logout)
           if (auth.currentUser) {
-            console.error('Error fetching recordings:', err);
+            logger.error('Error fetching recordings', err);
             setErrorText(err?.message || String(err));
           }
           setRecordings([]);
@@ -401,10 +396,7 @@ export default function HistoryScreen() {
           const audioRef = ref(storage, filePath);
           audioUri = await getDownloadURL(audioRef);
         } catch (storageErr) {
-          console.log(
-            'Storage URL fetch failed, trying direct URI:',
-            storageErr
-          );
+          logger.warn('Storage URL fetch failed, trying direct URI', storageErr);
           // Fall back to the provided URI
         }
       }
@@ -429,7 +421,7 @@ export default function HistoryScreen() {
 
       await newSound.playAsync();
     } catch (e) {
-      console.error('Audio play error:', e);
+      logger.error('Audio play error', e);
       Alert.alert('Playback Error', 'Unable to play audio file');
     }
   };
@@ -509,7 +501,7 @@ export default function HistoryScreen() {
       setEditMode(null);
       Alert.alert('Success', 'Recording updated and resubmitted for review');
     } catch (error) {
-      console.error('Error updating recording:', error);
+      logger.error('Error updating recording', error);
       Alert.alert('Error', 'Failed to update recording. Please try again.');
     } finally {
       setIsSaving(false);

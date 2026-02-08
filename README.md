@@ -1,50 +1,156 @@
-# Welcome to your Expo app 👋
+# Frogwatch+
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile citizen science app for recording and identifying frog species using AI-powered audio analysis. Built for volunteers, researchers, and experts to collaboratively build a database of frog call recordings tagged with GPS location data.
 
-## Get started
+<p align="center">
+  <img src="assets/images/frog_logo.png" alt="Frogwatch+ Logo" width="120"/>
+</p>
 
-1. Install dependencies
+## What It Does
 
+Frogwatch+ turns your smartphone into a field research tool. Walk outside, record a frog call, and the app identifies the species using a machine learning model hosted on Google Cloud. Every recording is tagged with your GPS coordinates and stored in Firebase, contributing to a growing scientific dataset of frog populations across different regions.
+
+The app supports 8 species found in the Great Lakes region:
+- American Toad
+- Bullfrog
+- Eastern Gray Treefrog
+- Green Frog
+- Midland Chorus Frog
+- Northern Leopard Frog
+- Northern Spring Peeper
+- Wood Frog
+
+## Screenshots
+
+### Home & Recording
+
+<p align="center">
+  <img src="screenshots/home-screen.png" alt="Home Screen" width="250"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/recording-listening.png" alt="Recording - Listening" width="250"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/recording-complete.png" alt="Recording Complete" width="250"/>
+</p>
+
+The **home screen** shows your status and quick navigation to all features. The **recording screen** uses your device microphone to capture up to 10 seconds of audio while displaying your GPS location on an interactive map. After recording, you can replay, re-record, or send it off for AI analysis.
+
+### AI Prediction & Submission
+
+<p align="center">
+  <img src="screenshots/prediction-treefrog.png" alt="Prediction - Eastern Gray Treefrog" width="250"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/prediction-chorus-frog.png" alt="Prediction - Midland Chorus Frog" width="250"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/prediction-submit.png" alt="Prediction Submission" width="250"/>
+</p>
+
+The AI model returns its top species prediction displayed over a full-screen photo of the identified frog. You can review the result, add your own confidence score and notes, then **submit for expert approval** -- or re-run the model if you disagree.
+
+### Recording History
+
+<p align="center">
+  <img src="screenshots/history-list.png" alt="History List" width="250"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/history-detail.png" alt="History Detail" width="250"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/history-search.png" alt="History Search" width="250"/>
+</p>
+
+Browse all your past recordings with species thumbnails, location info, and status indicators (Approved, Pending Review, Uploading). Expand any card to see the AI confidence score, replay the audio, edit your submission, or resubmit. Search and filter by species name or location.
+
+### Map View
+
+<p align="center">
+  <img src="screenshots/map-overview.png" alt="Map Overview" width="250"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/map-detail.png" alt="Map Detail" width="250"/>
+  &nbsp;&nbsp;
+  <img src="screenshots/map-date-filter.png" alt="Map Date Filter" width="250"/>
+</p>
+
+View all recordings plotted on an interactive map. Tap any marker to see species details, confidence scores, and playback controls. Filter by **date range** and **species** to explore patterns in frog populations across different locations.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | React Native + Expo |
+| Language | TypeScript |
+| Navigation | Expo Router (file-based) |
+| Auth | Firebase Authentication |
+| Database | Cloud Firestore |
+| File Storage | Firebase Cloud Storage |
+| ML Backend | Google Cloud Run |
+| Maps | React Native Maps + OpenStreetMap |
+| Audio | Expo Audio |
+| Location | Expo Location |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- iOS Simulator / Android Emulator / Physical device with [Expo Go](https://expo.dev/go)
+
+### Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/GHXST/Frogwatch.git
+   cd Frogwatch
+   ```
+
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in your Firebase and API configuration values.
 
+4. Start the development server:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+5. Open the app on your device using Expo Go, or run on a simulator/emulator.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Project Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+app/
+├── (tabs)/
+│   ├── recordScreen.tsx      # Audio recording with GPS
+│   ├── predictionScreen.tsx  # AI species identification
+│   ├── historyScreen.tsx     # Recording history list
+│   ├── mapHistoryScreen.tsx  # Map visualization
+│   ├── login.tsx             # Authentication
+│   └── register.tsx          # Account creation
+├── firebaseConfig.ts         # Firebase setup
+└── _layout.tsx               # Root layout & navigation
+services/
+├── api.ts                    # Backend API client
+├── config.ts                 # API configuration
+├── logger.ts                 # Logging utility
+└── getUserRole.ts            # Role-based access
+assets/
+├── frogs/                    # Species thumbnail images
+└── frogs_background/         # Full-screen species photos
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Role-Based Access
 
-## Learn more
+The app supports three user roles with tailored home screens and permissions:
 
-To learn more about developing your project with Expo, look at the following resources:
+- **Volunteer** -- Record frog calls and submit for review
+- **Expert** -- Review and approve volunteer submissions
+- **Admin** -- Full system management access
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## License
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This project was developed for scientific research and citizen science initiatives.

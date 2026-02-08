@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frogwatch-ui",
+    "name": "Frogwatch+",
     "slug": "frogwatch-ui",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,15 +8,37 @@
     "scheme": "frogwatchui",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "owner": "frogwatch",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.frogwatch.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Frogwatch+ needs access to your microphone to record frog calls for species identification.",
+        "NSLocationWhenInUseUsageDescription": "Frogwatch+ needs your location to tag recordings with geographic coordinates for scientific research.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Frogwatch+ needs your location to tag recordings with geographic coordinates for scientific research.",
+        "UIBackgroundModes": ["audio"]
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.frogwatch.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "INTERNET",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -36,11 +58,34 @@
       ],
       "expo-font",
       "expo-web-browser",
-      "expo-audio",
-      "expo-video"
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Frogwatch+ needs access to your microphone to record frog calls for species identification."
+        }
+      ],
+      "expo-video",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Frogwatch+ needs your location to tag recordings with geographic coordinates for scientific research.",
+          "locationWhenInUsePermission": "Frogwatch+ needs your location to tag recordings with geographic coordinates for scientific research."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/YOUR_EAS_PROJECT_ID"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }
